@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Проскануй мене — Донат & Лінки</title>
+  <meta name="theme-color" content="#0b0b0b" />
+  <style>
+    :root{
+      --bg-start:#050505; /* чорний */
+      --bg-end:#7a0b12;  /* темно-червоний */
+      --accent:#ff3b3b;  /* яскраво-червоний */
+      --text:#eaeaea;
+      --muted:#b3b3b3;
+      --card-bg: rgba(255,255,255,0.06);
+      --card-stroke: rgba(255,255,255,0.14);
+      --qr-bg:#ffffff;
+      --qr-fg:#000000;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, "Noto Sans", "Helvetica Neue", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 80% -10%, #b91826 0%, rgba(185,24,38,0.3) 35%, rgba(185,24,38,0.1) 55%, transparent 70%),
+                  linear-gradient(135deg, var(--bg-start) 0%, #1a0709 45%, #2a080b 60%, var(--bg-end) 100%);
+      min-height:100%;
+      display:flex; align-items:center; justify-content:center;
+      padding:24px;
+    }
+    .wrap{ width:min(960px, 100%); }
+
+    /* Top card number bar */
+    .top{
+      display:flex; align-items:center; justify-content:center; gap:12px;
+      margin:0 auto 18px auto;
+      flex-wrap:wrap;
+    }
+    .card-pill{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:12px 18px; border-radius:999px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border:1px solid var(--card-stroke);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      font-weight:600; letter-spacing:0.5px;
+    }
+    .card-num{font-variant-numeric: tabular-nums; font-size:18px;}
+    .copy{ cursor:pointer; padding:8px 12px; border-radius:999px; border:1px solid var(--card-stroke); background:var(--card-bg); color:var(--text); font-weight:600 }
+    .copy:hover{ border-color: rgba(255,255,255,0.35) }
+
+    .card-label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1.2px}
+
+    /* Main card */
+    .card{
+      border-radius:28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+      border:1px solid var(--card-stroke);
+      overflow:hidden; position:relative;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07);
+    }
+    .card-inner{ display:grid; grid-template-columns: 1fr; gap:0; }
+    @media (min-width: 820px){ .card-inner{ grid-template-columns: 1.1fr 0.9fr; } }
+
+    .qr-side{ padding:28px; display:flex; align-items:center; justify-content:center; }
+    .qr-box{
+      background: radial-gradient(600px 300px at 50% 0%, rgba(255,59,59,0.25), transparent 60%),
+                  linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+      border-radius:24px; padding:22px; border:1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    canvas#qr{ display:block; width:290px !important; height:290px !important; }
+    .scan-text{ text-align:center; margin-top:12px; color:#0a0a0a; font-weight:800; letter-spacing:0.4px }
+
+    .info-side{ padding:32px; display:flex; flex-direction:column; gap:18px; justify-content:center }
+    h1{ margin:0; font-size:34px; line-height:1.1 }
+    p.lead{ margin:6px 0 0 0; color:var(--muted); font-size:15px }
+
+    .links{ display:grid; grid-template-columns: 1fr; gap:12px; margin-top:8px }
+    @media (min-width:600px){ .links{ grid-template-columns: 1fr 1fr; } }
+    .btn{
+      display:flex; align-items:center; gap:12px;
+      padding:14px 16px; border-radius:14px;
+      border:1px solid var(--card-stroke); background:var(--card-bg);
+      color:var(--text); text-decoration:none; font-weight:700;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,0.35); }
+    .btn svg{ width:22px; height:22px; flex:0 0 22px }
+
+    .tiny{ font-size:12px; color:var(--muted) }
+    footer{ text-align:center; margin-top:16px; font-size:12px; color:var(--muted) }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top" role="banner">
+      <div class="card-pill" aria-label="Номер картки для донату">
+        <span class="card-label">Card / Картка</span>
+        <span class="card-num" id="cardNum">4790 7299 5888 9370</span>
+      </div>
+      <button class="copy" id="copyBtn" aria-label="Скопіювати номер картки">Copy</button>
+    </div>
+
+    <section class="card" role="main">
+      <div class="card-inner">
+        <div class="qr-side">
+          <div class="qr-box" aria-live="polite">
+            <canvas id="qr" width="580" height="580"></canvas>
+            <div class="scan-text">ПРОСКАНУЙ МЕНЕ</div>
+          </div>
+        </div>
+        <div class="info-side">
+          <h1>Донат на музику</h1>
+          <p class="lead">Скануй QR, щоб швидко скопіювати номер картки або відкрий мої соцмережі нижче.</p>
+
+          <div class="links">
+            <a class="btn" href="https://open.spotify.com/artist/4OT9kILqfxxZDUPVoH1VD7" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.45 14.5a.9.9 0 01-1.24.31c-3.4-2.08-7.7-2.55-12.74-1.4a.9.9 0 01-.4-1.75c5.44-1.25 10.17-.72 13.92 1.55.42.25.56.8.46 1.29zm1.78-3.19a1.12 1.12 0 01-1.54.38c-3.9-2.4-9.83-3.11-14.43-1.7a1.12 1.12 0 01-.64-2.15c5.15-1.53 11.65-.75 16.03 1.93.55.34.73 1.08.58 1.54zm.15-3.35c-4.46-2.64-11.83-2.88-16.08-1.59a1.34 1.34 0 01-.78-2.57c4.83-1.46 12.98-1.17 17.99 1.75a1.34 1.34 0 01-1.13 2.41z" fill="currentColor"/></svg>
+              Spotify
+            </a>
+            <a class="btn" href="https://www.instagram.com/lapa_dimalopatin?igsh=MXM4eG9sbGwydmIwMA%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 2 .3 2.5.6.6.3 1.1.7 1.6 1.2.5.5.9 1 1.2 1.6.3.5.5 1.3.6 2.5.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.3 2-.6 2.5-.3.6-.7 1.1-1.2 1.6-.5.5-1 .9-1.6 1.2-.5.3-1.3.5-2.5.6-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-2-.3-2.5-.6-.6-.3-1.1-.7-1.6-1.2-.5-.5-.9-1-1.2-1.6-.3-.5-.5-1.3-.6-2.5C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.3-2 .6-2.5.3-.6.7-1.1 1.2-1.6.5-.5 1-.9 1.6-1.2.5-.3 1.3-.5 2.5-.6C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.8.1-1 .1-1.6.2-2 .4-.5.2-.8.4-1.2.8-.4.4-.6.7-.8 1.2-.2.4-.4 1-.4 2-.1 1.3-.1 1.7-.1 4.8s0 3.5.1 4.8c.1 1 .2 1.6.4 2 .2.5.4.8.8 1.2.4.4.7.6 1.2.8.4.2 1 .4 2 .4 1.3.1 1.7.1 4.8.1s3.5 0 4.8-.1c1 0 1.6-.2 2-.4.5-.2.8-.4 1.2-.8.4-.4.6-.7.8-1.2.2-.4.4-1 .4-2 .1-1.3.1-1.7.1-4.8s0-3.5-.1-4.8c0-1-.2-1.6-.4-2-.2-.5-.4-.8-.8-1.2-.4-.4-.7-.6-1.2-.8-.4-.2-1-.4-2-.4-1.3-.1-1.7-.1-4.8-.1zm0 3c2.9 0 5.2 2.3 5.2 5.2S14.9 17.4 12 17.4 6.8 15.1 6.8 12 9.1 7 12 7zm0 1.8A3.4 3.4 0 008.6 12 3.4 3.4 0 0012 15.4 3.4 3.4 0 0015.4 12 3.4 3.4 0 0012 8.8zm6-2.6c0 .5.4.9.9.9s.9-.4.9-.9-.4-.9-.9-.9-.9.4-.9.9z" fill="currentColor"/></svg>
+              Instagram
+            </a>
+            <a class="btn" href="https://www.tiktok.com/@lapatindima?_t=ZM-8yx1vF1Vwfu&_r=1" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M17.1 2.2c.4 2.1 1.8 3.9 3.8 4.7v3.2c-1.5 0-3-.4-4.4-1.1v6.8c0 4-3.2 7.2-7.2 7.2S2.1 19.8 2.1 15.8s3.2-7.2 7.2-7.2c.5 0 1 .1 1.5.2v3.4c-.5-.2-1-.3-1.5-.3-2.1 0-3.8 1.7-3.8 3.9s1.7 3.9 3.8 3.9 3.9-1.7 3.9-3.8V2.2h3.9z" fill="currentColor"/></svg>
+              TikTok
+            </a>
+          </div>
+
+          <div class="tiny">Дякую за підтримку! ❤</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>© <span id="year"></span> Lapatin</footer>
+  </div>
+
+  <!-- QRCode lib via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script>
+    const card = '4790 7299 5888 9370';
+
+    // Render year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Copy button
+    const copyBtn = document.getElementById('copyBtn');
+    copyBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(card.replace(/\s+/g,''));
+        copyBtn.textContent = 'Copied!';
+        setTimeout(()=> copyBtn.textContent='Copy', 1400);
+      }catch(e){
+        copyBtn.textContent = 'Failed :(';
+        setTimeout(()=> copyBtn.textContent='Copy', 1400);
+      }
+    });
+
+    // Generate QR code that contains the card number in a simple URI-like text
+    // Many banking apps allow pasting a raw card number; QR will encode the plain text
+    const canvas = document.getElementById('qr');
+    const qrText = `CARD:${card}`; // plain text payload
+
+    // Pick a high error correction level so the center overlay stays scannable
+    QRCode.toCanvas(canvas, qrText, {
+      errorCorrectionLevel: 'H',
+      margin: 2,
+      scale: 10,
+      color: { dark: '#000000', light: '#ffffff' }
+    }, function (error) {
+      if (error) console.error(error);
+      // Optional: draw a tiny brand dot in the center
+      const ctx = canvas.getContext('2d');
+      const s = canvas.width; // square
+      const r = Math.round(s * 0.06);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(s/2, s/2, r, 0, Math.PI*2);
+      ctx.fillStyle = '#ff3333';
+      ctx.shadowColor = 'rgba(0,0,0,0.25)';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // Click QR to copy card as well
+    canvas.addEventListener('click', async ()=>{
+      await navigator.clipboard.writeText(card.replace(/\s+/g,''));
+      const txt = document.querySelector('.scan-text');
+      const prev = txt.textContent;
+      txt.textContent = 'Скопійовано!';
+      setTimeout(()=> txt.textContent = prev, 1200);
+    });
+  </script>
+</body>
+</html>
